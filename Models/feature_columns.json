@@ -1,0 +1,22 @@
+[
+  "Latitude",
+  "Longitude",
+  "Primary NAICS Code",
+  "City",
+  "State",
+  "Zip Code",
+  "County",
+  "Industry Type (subparts)",
+  "Industry Type (sectors)",
+  "Is some CO2 collected on-site and used to manufacture other products and therefore not emitted from the affected manufacturing process unit(s)? (as reported under Subpart G or S)",
+  "Is some CO2 reported as emissions from the affected manufacturing process unit(s) under Subpart AA, G or P collected and transferred off-site or injected (as reported under Subpart PP)?",
+  "Does the facility employ continuous emissions monitoring? ",
+  "Year",
+  "emissions_lag_1",
+  "emissions_lag_2",
+  "emissions_lag_3",
+  "emissions_avg_3",
+  "emissions_avg_5",
+  "emissions_change_1",
+  "emissions_growth_1"
+]
