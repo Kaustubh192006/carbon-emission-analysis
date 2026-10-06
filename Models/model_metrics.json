@@ -1,0 +1,9 @@
+{
+    "r2": 0.954537,
+    "mae": 60913.85,
+    "rmse": 224189.81,
+    "smape": 21.77,
+    "training_years": "2014-2022",
+    "test_year": 2023,
+    "test_records": 6179
+}
