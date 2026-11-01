@@ -17,8 +17,7 @@ Data/raw/
 Data/processed/
 
 # Model files
-*.pkl
-*.joblib
+*_backup.pkl
 
 # OS files
 .DS_Store
