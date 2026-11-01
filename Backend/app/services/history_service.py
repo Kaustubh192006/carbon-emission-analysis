@@ -143,6 +143,7 @@ def get_facility_record(
 
     row_df = df.loc[mask].copy()
 
+    is_future_year = False
     if row_df.empty:
         available_years = get_available_years(facility_id)
 
@@ -151,10 +152,23 @@ def get_facility_record(
                 f"Facility ID {facility_id} was not found in the historical dataset."
             )
 
-        raise KeyError(
-            f"Year {year} is not available for facility {facility_id}. "
-            f"Available years: {available_years}"
-        )
+        latest_year = max(available_years)
+        if year > latest_year:
+            latest_mask = _normalize_id_mask(df["Facility Id"], facility_id) & _normalize_year_mask(df["Year"], latest_year)
+            latest_df = df.loc[latest_mask].copy()
+            if not latest_df.empty:
+                row_df = latest_df.iloc[[0]].copy()
+                row_df.loc[:, "Year"] = year
+                latest_actual = row_df.get("target_emissions", pd.Series([None])).iloc[0]
+                if pd.notna(latest_actual):
+                    row_df.loc[:, "emissions_lag_1"] = latest_actual
+                is_future_year = True
+
+        if row_df.empty:
+            raise KeyError(
+                f"Year {year} is not available for facility {facility_id}. "
+                f"Available years: {available_years}"
+            )
 
     if len(row_df) != 1:
         raise RuntimeError(
@@ -186,7 +200,8 @@ def get_facility_record(
         "facility_id": int(row["Facility Id"]),
         "facility_name": _safe_value(row["Facility Name"]),
         "year": int(row["Year"]),
-        "actual_emission": _safe_value(row.get("target_emissions")),
+        "actual_emission": None if is_future_year else _safe_value(row.get("target_emissions")),
+        "is_future_year": is_future_year,
         "available_years": get_available_years(facility_id),
         "history_status": history_status,
         "available_history_features": available_history_count,

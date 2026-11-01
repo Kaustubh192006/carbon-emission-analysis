@@ -1,25 +1,172 @@
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 
 import "./App.css";
 
+import DataExplorerView from "./components/DataExplorerView";
+import ForecastingView from "./components/ForecastingView";
+import ScenarioView from "./components/ScenarioView";
+import ModelComparisonView from "./components/ModelComparisonView";
+import ResultsView from "./components/ResultsView";
 
 
-const API_BASE = "http://127.0.0.1:8000";
 
-const YEARS = Array.from({ length: 12 }, (_, index) => 2023 - index);
+const API_BASE = import.meta.env.VITE_API_BASE || "http://127.0.0.1:8000";
+
+const YEARS = [
+  2030, 2029, 2028, 2027, 2026, 2025, 2024,
+  2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012
+];
 
 
+
+const SectionIcon = memo(({ id, className = "", size = 18 }) => {
+  switch (id) {
+    case "dashboard":
+      return (
+        <svg
+          className={className}
+          width={size}
+          height={size}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <rect x="3" y="3" width="7.5" height="7.5" rx="2" />
+          <rect x="13.5" y="3" width="7.5" height="5" rx="2" />
+          <rect x="13.5" y="11" width="7.5" height="10" rx="2" />
+          <rect x="3" y="13.5" width="7.5" height="7.5" rx="2" />
+        </svg>
+      );
+    case "predictions":
+      return (
+        <svg
+          className={className}
+          width={size}
+          height={size}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M12 2C12 7.5 16.5 12 22 12C16.5 12 12 16.5 12 22C12 16.5 7.5 12 2 12C7.5 12 12 7.5 12 2Z" />
+          <circle cx="12" cy="12" r="1.6" fill="currentColor" />
+          <path d="M19.5 2.5V5.5M18 4H21" strokeWidth="1.5" />
+        </svg>
+      );
+    case "analytics":
+      return (
+        <svg
+          className={className}
+          width={size}
+          height={size}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M3 20.5H21" />
+          <path d="M4.5 15.5L9.5 10.5L14 14L20 6.5" />
+          <polyline points="15.5 6.5 20 6.5 20 11" />
+          <circle cx="9.5" cy="10.5" r="1.3" fill="currentColor" />
+          <circle cx="14" cy="14" r="1.3" fill="currentColor" />
+          <circle cx="20" cy="6.5" r="1.7" fill="currentColor" />
+        </svg>
+      );
+    case "facilities":
+      return (
+        <svg
+          className={className}
+          width={size}
+          height={size}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M3 21V10L9 6V12L15 8V14L21 11V21H3Z" />
+          <line x1="7" y1="17" x2="7.01" y2="17" strokeWidth="3" />
+          <line x1="12" y1="17" x2="12.01" y2="17" strokeWidth="3" />
+          <line x1="17" y1="17" x2="17.01" y2="17" strokeWidth="3" />
+        </svg>
+      );
+    case "explore":
+      return (
+        <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <line x1="3" y1="9" x2="21" y2="9" />
+          <line x1="3" y1="15" x2="21" y2="15" />
+          <line x1="9" y1="3" x2="9" y2="21" />
+          <line x1="15" y1="3" x2="15" y2="21" />
+        </svg>
+      );
+    case "forecast":
+      return (
+        <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+          <polyline points="16 7 22 7 22 13" />
+        </svg>
+      );
+    case "scenarios":
+      return (
+        <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M12 2v8" />
+          <path d="m4.93 10.93 4.24 4.24" />
+          <path d="M2 12h8" />
+          <path d="M14 12c0 4.42-3.58 8-8 8" />
+          <circle cx="17.5" cy="6.5" r="3.5" />
+          <path d="M17.5 10v12" />
+          <path d="M14 16h7" />
+        </svg>
+      );
+    case "models":
+      return (
+        <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+          <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+          <path d="M4 22h16" />
+          <path d="M10 14.66V17c0 .55-.45 1-1 1H7" />
+          <path d="M14 14.66V17c0 .55.45 1 1 1h2" />
+          <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+        </svg>
+      );
+    case "results":
+      return (
+        <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
+          <polyline points="10 9 9 9 8 9" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+});
 
 const NAV_ITEMS = [
-
-  { id: "dashboard", label: "Dashboard", icon: "⌂" },
-
-  { id: "predictions", label: "Predictions", icon: "✦" },
-
-  { id: "analytics", label: "Analytics", icon: "▥" },
-
-  { id: "facilities", label: "Facilities", icon: "⌁" },
-
+  { id: "dashboard", label: "Dashboard", badge: null },
+  { id: "explore", label: "Data Explorer", badge: "IPCC" },
+  { id: "forecast", label: "Forecasting", badge: "2035" },
+  { id: "scenarios", label: "Scenario Analysis", badge: "50%" },
+  { id: "models", label: "Model Benchmark", badge: "R² 0.95" },
+  { id: "results", label: "Audit & Export", badge: "CSV" },
+  { id: "predictions", label: "ML Estimator", badge: null },
+  { id: "analytics", label: "Macro Trends", badge: null },
+  { id: "facilities", label: "Facilities", badge: "10" },
 ];
 
 
@@ -89,6 +236,51 @@ const VIEW_META = {
 
     imageCaption: "Macro-level patterns reveal where emissions concentrate.",
 
+  },
+
+  explore: {
+    eyebrow: "DATA EXPLORER & INGESTION",
+    title: <>Ingest activity data. <em>Analyze correlations.</em></>,
+    subtitle: "Upload plant-level production CSVs, inspect operational correlation heatmaps, and query historical facility emissions.",
+    image: "/analytics-aerial.jpg",
+    imageLabel: "Activity explorer",
+    imageCaption: "Multivariate relationships between throughput, power, and emissions.",
+  },
+
+  forecast: {
+    eyebrow: "TIME-SERIES FORECASTING",
+    title: <>Project future emissions with <em>statistical rigor.</em></>,
+    subtitle: "Deploy ARIMA/SARIMA, Meta Prophet, or Random Forest autoregressive models with 95% confidence intervals and ADF stationarity checks.",
+    image: "/predictions-tree.jpg",
+    imageLabel: "Forecasting studio",
+    imageCaption: "Forward-looking trajectories over 1 to 5-year planning horizons.",
+  },
+
+  scenarios: {
+    eyebrow: "SUSTAINABILITY MODELING",
+    title: <>Simulate <em>renewable energy impact.</em></>,
+    subtitle: "What-if scenario simulator: calculate avoided emissions and carbon tax savings from 10% to 50% renewable adoption displacing fossil fuels.",
+    image: "/dashboard-sunset.jpg",
+    imageLabel: "Decarbonization pathway",
+    imageCaption: "Emissions_scenario = Baseline - (Renewable_Share × Displaced_Energy × EF)",
+  },
+
+  models: {
+    eyebrow: "ACADEMIC BENCHMARK",
+    title: <>Rigorous <em>model comparison.</em></>,
+    subtitle: "Compare Random Forest against ARIMA, Prophet, Ridge, and Linear Regression using MAE, RMSE, MAPE, and R² under IEEE Std 830-1998 standards.",
+    image: "/facilities-road.jpg",
+    imageLabel: "Model evaluation",
+    imageCaption: "Champion: Random Forest Regressor with R² = 0.9545.",
+  },
+
+  results: {
+    eyebrow: "AUDIT & EXPORT",
+    title: <>Generate audit-ready <em>sustainability reports.</em></>,
+    subtitle: "Download formal CSV forecast reports and calculate exact IPCC AR5 GWP conversions and emission intensity benchmarks.",
+    image: "/dashboard-sunset.jpg",
+    imageLabel: "Audit trail",
+    imageCaption: "Downloadable dataset for compliance and academic defense.",
   },
 
   facilities: {
@@ -250,6 +442,8 @@ async function fetchJson(url, options = {}) {
 function App() {
 
   const [activeView, setActiveView] = useState("dashboard");
+  const [visitedViews, setVisitedViews] = useState(() => new Set(["dashboard"]));
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
 
 
@@ -575,9 +769,16 @@ function App() {
 
     setActiveView(view);
 
+    setVisitedViews((prev) => {
+      if (prev.has(view)) return prev;
+      const next = new Set(prev);
+      next.add(view);
+      return next;
+    });
+
     setShowPrediction(false);
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo(0, 0);
 
   };
 
@@ -687,7 +888,7 @@ function App() {
 
 
 
-  const hero = VIEW_META[activeView];
+  const hero = VIEW_META[activeView] || VIEW_META.dashboard;
 
 
 
@@ -697,7 +898,10 @@ function App() {
 
       <div className="hero-copy">
 
-        <p className="eyebrow">{hero.eyebrow}</p>
+        <div className="eyebrow">
+          <SectionIcon id={activeView} size={14} className="eyebrow-icon" />
+          <span>{hero.eyebrow}</span>
+        </div>
 
         <h1>{hero.title}</h1>
 
@@ -785,7 +989,7 @@ function App() {
 
         <div className="hero-media-card">
 
-          <span className="hero-media-mark">✦</span>
+          <span className="hero-media-mark"><SectionIcon id={activeView} size={18} /></span>
 
           <strong>{hero.imageLabel}</strong>
 
@@ -2121,71 +2325,82 @@ function App() {
 
 
 
-      <header className="top-nav">
-
-        <div className="brand">
-
-          <div className="brand-mark">CO₂</div>
-
-          <div>
-
-            <strong>CarbonAI</strong>
-
-            <span>Emission Intelligence</span>
-
+      {/* Floating Luxury Dock Sidebar (Reference Match) */}
+      <aside
+        className={`floating-dock-sidebar ${sidebarCollapsed ? "dock-collapsed" : "dock-expanded"}`}
+      >
+        {/* Dock Header */}
+        <div className="dock-header">
+          <div className="dock-brand-group">
+            <div className="dock-logo-mark">CO₂</div>
+            {!sidebarCollapsed && (
+              <div className="dock-brand-meta">
+                <strong>CarbonAI</strong>
+                <span>P_132 Petrochemical</span>
+              </div>
+            )}
           </div>
-
+          <button
+            type="button"
+            className="dock-toggle-btn"
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            title={sidebarCollapsed ? "Expand Navigation Dock" : "Collapse Navigation Dock"}
+            aria-label="Toggle Navigation Dock"
+          >
+            {sidebarCollapsed ? "›" : "‹"}
+          </button>
         </div>
 
+        {/* Dock Nav Items List */}
+        <nav className="dock-nav-list">
+          {NAV_ITEMS.map((item) => {
+            const isActive = activeView === item.id;
+            return (
+              <button
+                key={item.id}
+                className={`dock-nav-item ${isActive ? "active" : ""}`}
+                type="button"
+                onClick={() => navigate(item.id)}
+                title={sidebarCollapsed ? item.label : undefined}
+              >
+                {/* Glowing Left Indicator Bar (Reference Match) */}
+                {isActive && <span className="dock-active-glow-bar" />}
 
+                <span className="dock-icon-box">
+                  <SectionIcon id={item.id} className="dock-svg-icon" size={18} />
+                </span>
 
-        <nav className="nav-items">
+                {!sidebarCollapsed && (
+                  <span className="dock-item-label">{item.label}</span>
+                )}
 
-          {NAV_ITEMS.map((item) => (
-
-            <button
-
-              key={item.id}
-
-              className={`nav-item ${activeView === item.id ? "active" : ""}`}
-
-              type="button"
-
-              onClick={() => navigate(item.id)}
-
-            >
-
-              <span>{item.icon}</span>
-
-              {item.label}
-
-            </button>
-
-          ))}
-
+                {!sidebarCollapsed && item.badge && (
+                  <span className="dock-item-badge">{item.badge}</span>
+                )}
+              </button>
+            );
+          })}
         </nav>
 
-
-
-        <div className="nav-status">
-
-          <span className="status-dot" />
-
-          <div>
-
-            <strong>Model Online</strong>
-
-            <small>Random Forest · {analytics?.model?.estimators ?? 200} trees</small>
-
+        {/* Dock Footer Status Card */}
+        <div className="dock-footer">
+          <div className="dock-status-card" title="Random Forest Ensemble Model Online">
+            <span className="dock-status-dot" />
+            {!sidebarCollapsed && (
+              <div className="dock-status-details">
+                <strong>ML Engine Live</strong>
+                <small>RF Champion · R² 0.9545</small>
+              </div>
+            )}
           </div>
-
         </div>
+      </aside>
 
-      </header>
-
-
-
-      <main className={`main-content view-${activeView}`}>
+      <main
+        className={`main-content view-${activeView} ${
+          sidebarCollapsed ? "main-collapsed-dock" : "main-expanded-dock"
+        }`}
+      >
 
         {dashboardError && (
 
@@ -2195,13 +2410,41 @@ function App() {
 
 
 
-        {activeView === "dashboard" && renderDashboard()}
+        <div style={{ display: activeView === "dashboard" ? "block" : "none" }}>
+          {visitedViews.has("dashboard") && renderDashboard()}
+        </div>
 
-        {activeView === "predictions" && renderPredictions()}
+        <div style={{ display: activeView === "explore" ? "block" : "none" }}>
+          {visitedViews.has("explore") && <DataExplorerView apiBase={API_BASE} />}
+        </div>
 
-        {activeView === "analytics" && renderAnalytics()}
+        <div style={{ display: activeView === "forecast" ? "block" : "none" }}>
+          {visitedViews.has("forecast") && <ForecastingView apiBase={API_BASE} />}
+        </div>
 
-        {activeView === "facilities" && renderFacilities()}
+        <div style={{ display: activeView === "scenarios" ? "block" : "none" }}>
+          {visitedViews.has("scenarios") && <ScenarioView apiBase={API_BASE} />}
+        </div>
+
+        <div style={{ display: activeView === "models" ? "block" : "none" }}>
+          {visitedViews.has("models") && <ModelComparisonView apiBase={API_BASE} />}
+        </div>
+
+        <div style={{ display: activeView === "results" ? "block" : "none" }}>
+          {visitedViews.has("results") && <ResultsView apiBase={API_BASE} />}
+        </div>
+
+        <div style={{ display: activeView === "predictions" ? "block" : "none" }}>
+          {visitedViews.has("predictions") && renderPredictions()}
+        </div>
+
+        <div style={{ display: activeView === "analytics" ? "block" : "none" }}>
+          {visitedViews.has("analytics") && renderAnalytics()}
+        </div>
+
+        <div style={{ display: activeView === "facilities" ? "block" : "none" }}>
+          {visitedViews.has("facilities") && renderFacilities()}
+        </div>
 
 
 
