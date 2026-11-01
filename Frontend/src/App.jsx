@@ -1119,7 +1119,7 @@ function App() {
 
                 <div className="trend-column" key={row.year}>
 
-                  <span className="trend-value">{formatNumber(row.value / 1e6, 1)}M</span>
+                  <span className="trend-value">{formatNumber(row.value / 1e9, 2)}B</span>
 
                   <div
 
@@ -1907,7 +1907,7 @@ function App() {
 
                 <span className="trend-value">
 
-                  {formatNumber(row.value / 1e6, 1)}M
+                  {formatNumber(row.value / 1e9, 2)}B
 
                 </span>
 

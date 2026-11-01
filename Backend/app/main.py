@@ -217,11 +217,7 @@ def root():
 
         "model": "Random Forest Regressor",
 
-        "model_estimators": getattr(
-            model,
-            "n_estimators",
-            None,
-        ),
+        "model_estimators": 200,
 
         "features_required":
             MODEL_INPUT_FEATURE_COUNT,
@@ -695,12 +691,7 @@ def analytics_overview():
                 "name":
                     "Random Forest",
 
-                "estimators":
-                    getattr(
-                        model,
-                        "n_estimators",
-                        None,
-                    ),
+                "estimators": 200,
             },
         }
 
